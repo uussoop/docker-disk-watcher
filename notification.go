@@ -2,7 +2,7 @@ package dockerdiskwatcher
 
 import (
 	"os"
-	"time"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -10,7 +10,6 @@ import (
 var BotToken string
 var AdminId string
 var AdminIdInt int64
-var lastMessage time.Time
 var Bot *tgbotapi.BotAPI
 
 func SendTelegramMessage(message string) {
@@ -22,14 +21,14 @@ func SendTelegramMessage(message string) {
 	if BotToken == "" {
 		panic("TELEGRAM_APITOKEN is not set")
 	}
-	var err error
+	AdminIdInt, err := strconv.ParseInt(AdminId, 10, 64)
+	if err != nil {
+		panic(err)
+	}
 	Bot, err = tgbotapi.NewBotAPI(BotToken)
 	if err != nil {
 		panic(err)
 	}
-	if time.Since(lastMessage).Seconds() < 60 {
-		return
-	}
 	Bot.Send(tgbotapi.NewMessage(AdminIdInt, message))
-	lastMessage = time.Now()
+
 }
