@@ -2,6 +2,7 @@ package dockerdiskwatcher
 
 import (
 	"flag"
+	"fmt"
 	"math"
 	"os"
 	"os/exec"
@@ -50,6 +51,7 @@ func Watch() {
 		flag.Usage()
 		os.Exit(1)
 	}
+	SendTelegramMessage(fmt.Sprintf("watching %s and config file %s for limit %f is starting", *directory, *composeFile, sizeLimit))
 
 	// Watch the directory size
 	for {
@@ -57,6 +59,7 @@ func Watch() {
 		logrus.Infof("this is the current size of that dir: %f GB", size)
 		if err != nil {
 			logrus.Errorf("Error getting directory size: %v\n", err)
+			SendTelegramMessage(fmt.Sprintf("Error getting directory size: %v\n", err))
 			os.Exit(1)
 		}
 
@@ -64,8 +67,12 @@ func Watch() {
 			logrus.Info("Directory size limit exceeded, pausing Docker Compose services...")
 			if err := pauseDockerCompose(*composeFile); err != nil {
 				logrus.Errorf("Error pausing Docker Compose services: %v\n", err)
+				SendTelegramMessage(fmt.Sprintf("Error pausing Docker Compose services: %v\n", err))
+
 				os.Exit(1)
 			}
+			SendTelegramMessage(fmt.Sprintf("watching %s and config file %s for limit %f -- compose has been paused", *directory, *composeFile, sizeLimit))
+
 			logrus.Info("Docker Compose services paused.")
 			break
 		}
