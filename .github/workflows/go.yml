@@ -29,4 +29,5 @@ jobs:
           args: release --clean
           workdir: ./cmd/
         env:
+          CGO_ENABLED: 0
           GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
